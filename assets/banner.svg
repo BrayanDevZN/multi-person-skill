@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="social-sim: uma estrela central cercada por personas que reagem a um anúncio">
+  <title>social-sim</title>
+  <desc>Uma estrela laranja pulsa no centro enquanto personas ao redor reagem ao anúncio com curtida, comentário, rejeição e compra.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f1a17"/>
+      <stop offset="1" stop-color="#2d2420"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#d97757" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#d97757" stop-opacity="0"/>
+    </radialGradient>
+    <style>
+      text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+      .title { fill: #faf3ee; font-size: 34px; font-weight: 700; letter-spacing: .5px; }
+      .sub { fill: #c9b8ad; font-size: 15px; }
+      .tag { fill: #faf3ee; font-size: 12px; font-weight: 600; }
+      .ring { fill: none; stroke: #d97757; stroke-opacity: .25; stroke-dasharray: 3 7; }
+      .spin { transform-origin: 450px 118px; animation: spin 40s linear infinite; }
+      .spin-rev { transform-origin: 450px 118px; animation: spin 60s linear infinite reverse; }
+      .star { transform-origin: 450px 118px; animation: pulse 3s ease-in-out infinite; }
+      .rays { transform-origin: 450px 118px; animation: spin 18s linear infinite; }
+      .glow { transform-origin: 450px 118px; animation: breathe 3s ease-in-out infinite; }
+      .bubble { opacity: 0; animation: pop 8s ease-in-out infinite; }
+      .b1 { animation-delay: 0s; } .b2 { animation-delay: 1.6s; }
+      .b3 { animation-delay: 3.2s; } .b4 { animation-delay: 4.8s; } .b5 { animation-delay: 6.4s; }
+      .bar { transform-box: fill-box; transform-origin: left center; animation: grow 8s ease-in-out infinite; }
+      .dot { animation: blink 1.4s ease-in-out infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+      @keyframes breathe { 0%,100% { transform: scale(1); opacity: .7; } 50% { transform: scale(1.25); opacity: 1; } }
+      @keyframes pop { 0%,4% { opacity: 0; transform: translateY(8px) scale(.9); }
+                       10%,22% { opacity: 1; transform: translateY(0) scale(1); }
+                       30%,100% { opacity: 0; transform: translateY(-6px) scale(.98); } }
+      @keyframes grow { 0% { transform: scaleX(.05); } 60%,100% { transform: scaleX(1); } }
+      @keyframes blink { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { * { animation: none !important; } .bubble { opacity: 1; } }
+    </style>
+    <g id="person">
+      <circle r="17" fill="#3a2f2a" stroke="#d97757" stroke-width="2"/>
+      <circle cy="-4" r="6" fill="#f2d3c4"/>
+      <path d="M-10 12 q10 -14 20 0" fill="#f2d3c4"/>
+    </g>
+  </defs>
+
+  <rect width="900" height="300" rx="18" fill="url(#bg)"/>
+
+  <!-- órbitas -->
+  <g class="spin"><ellipse cx="450" cy="118" rx="300" ry="82" class="ring"/></g>
+  <g class="spin-rev"><ellipse cx="450" cy="118" rx="200" ry="56" class="ring"/></g>
+
+  <!-- estrela central -->
+  <circle class="glow" cx="450" cy="118" r="80" fill="url(#glow)"/>
+  <g class="rays" stroke="#d97757" stroke-width="3" stroke-linecap="round" opacity=".55">
+    <line x1="450" y1="48" x2="450" y2="64"/><line x1="450" y1="172" x2="450" y2="188"/>
+    <line x1="380" y1="118" x2="396" y2="118"/><line x1="504" y1="118" x2="520" y2="118"/>
+    <line x1="400" y1="68" x2="410" y2="80"/><line x1="490" y1="156" x2="500" y2="168"/>
+    <line x1="500" y1="68" x2="490" y2="80"/><line x1="410" y1="156" x2="400" y2="168"/>
+  </g>
+  <g class="star">
+    <path fill="#d97757" d="M450 78 L460 108 L490 118 L460 128 L450 158 L440 128 L410 118 L440 108 Z"/>
+    <path fill="#f0a98e" d="M450 94 L455 111 L472 118 L455 125 L450 142 L445 125 L428 118 L445 111 Z"/>
+  </g>
+
+  <!-- personas -->
+  <use href="#person" x="130" y="95"/>
+  <use href="#person" x="230" y="190"/>
+  <use href="#person" x="670" y="190"/>
+  <use href="#person" x="770" y="95"/>
+
+  <!-- reações -->
+  <g class="bubble b1"><rect x="62" y="38" width="130" height="28" rx="14" fill="#3b7d5c"/><text class="tag" x="127" y="57" text-anchor="middle">clicou · intenção 8</text></g>
+  <g class="bubble b2"><rect x="168" y="224" width="130" height="28" rx="14" fill="#8a6d3b"/><text class="tag" x="233" y="243" text-anchor="middle">ignorou · scroll</text></g>
+  <g class="bubble b3"><rect x="602" y="224" width="136" height="28" rx="14" fill="#a8453d"/><text class="tag" x="670" y="243" text-anchor="middle">rejeitou · "golpe?"</text></g>
+  <g class="bubble b4"><rect x="702" y="38" width="136" height="28" rx="14" fill="#3b7d5c"/><text class="tag" x="770" y="57" text-anchor="middle">converteu · 9/10</text></g>
+  <g class="bubble b5"><rect x="360" y="190" width="180" height="28" rx="14" fill="#4a5568"/><text class="tag" x="450" y="209" text-anchor="middle">comentou · "quanto custa?"</text></g>
+
+  <!-- título -->
+  <text class="title" x="450" y="268" text-anchor="middle">social-sim</text>
+  <text class="sub" x="450" y="290" text-anchor="middle">teste sua ideia com um público simulado de redes sociais</text>
+</svg>
