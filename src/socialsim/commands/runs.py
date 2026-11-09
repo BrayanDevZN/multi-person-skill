@@ -2,6 +2,10 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+import os
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +16,7 @@ from socialsim.core import Ctx, get_or_404, need_confirm, need_id, paginate, to_
 from socialsim.models import (ACTIONS, REACTION_STATUSES, RUN_STATUSES, SENTIMENTS, Idea, Persona,
                               Reaction, Run, utcnow)
 from socialsim.registry import command
-from socialsim.report_html import render_html
+from socialsim.report_html import render_html, render_text
 from socialsim.validation import CliError, Field, as_list, validate
 
 RUN_START_SPEC = {
@@ -300,10 +304,7 @@ def report_run(ctx: Ctx) -> Any:
     }
 
 
-@command("report", "html", help="Write a self-contained HTML report of a finished run (numbers from the database + your analysis)",
-         id_arg="RUN_ID", payload="optional", flags=("out",), spec=REPORT_HTML_SPEC,
-         example="""report html 1 --out reports/run_1.html --json '{"verdict": "Interest is concentrated in owners of small shops.", "recommendations": ["Show the price in the ad"]}'""")
-def report_html(ctx: Ctx) -> Any:
+def _report_parts(ctx: Ctx) -> tuple[Run, dict[str, Any], dict[str, Any], list[dict[str, Any]], dict[str, Any], list[dict[str, Any]]]:
     run = _get_run(ctx)
     analysis = validate(ctx.payload or {}, REPORT_HTML_SPEC, partial=True)
     counts = _counts(run)
@@ -318,8 +319,90 @@ def report_html(ctx: Ctx) -> Any:
         "objections": r.objections,
     } for r in run.reactions if r.status == "ok"]
     research = [{"topic": x.topic, "finding": x.finding} for x in run.idea.research]
-    page = render_html(report, idea, reactions, analysis, research)
-    out = Path(ctx.opts.get("out") or f"reports/run_{run.id}.html").expanduser()
+    return run, report, idea, reactions, analysis, research
+
+
+def _out_path(ctx: Ctx, run: Run, ext: str) -> Path:
+    out = Path(ctx.opts.get("out") or f"reports/run_{run.id}.{ext}").expanduser()
     out.parent.mkdir(parents=True, exist_ok=True)
+    return out
+
+
+_REPORT_EXAMPLE = """{"verdict": "Interest is concentrated in owners of small shops.", "recommendations": ["Show the price in the ad"]}"""
+
+
+@command("report", "html", help="Write the report as a self-contained HTML page (numbers from the database + your analysis)",
+         id_arg="RUN_ID", payload="optional", flags=("out",), spec=REPORT_HTML_SPEC,
+         example=f"report html 1 --out reports/run_1.html --json '{_REPORT_EXAMPLE}'")
+def report_html(ctx: Ctx) -> Any:
+    run, report, idea, reactions, analysis, research = _report_parts(ctx)
+    page = render_html(report, idea, reactions, analysis, research)
+    out = _out_path(ctx, run, "html")
     out.write_text(page, encoding="utf-8")
-    return {"run_id": run.id, "file": str(out.resolve()), "bytes": len(page.encode("utf-8"))}
+    return {"run_id": run.id, "format": "html", "file": str(out.resolve()), "bytes": len(page.encode("utf-8"))}
+
+
+@command("report", "text", help="Write the report as plain Markdown text",
+         id_arg="RUN_ID", payload="optional", flags=("out",), spec=REPORT_HTML_SPEC,
+         example=f"report text 1 --out reports/run_1.md --json '{_REPORT_EXAMPLE}'")
+def report_text(ctx: Ctx) -> Any:
+    run, report, idea, reactions, analysis, _research = _report_parts(ctx)
+    page = render_text(report, idea, reactions, analysis)
+    out = _out_path(ctx, run, "md")
+    out.write_text(page, encoding="utf-8")
+    return {"run_id": run.id, "format": "text", "file": str(out.resolve()), "bytes": len(page.encode("utf-8"))}
+
+
+def _chrome_candidates() -> list[tuple[str, bool]]:
+    """Browsers that can print a page to PDF, best first: (path, is_headless_shell)."""
+    found: list[tuple[str, bool]] = []
+    for env in ("SOCIALSIM_CHROME", "CHROME_PATH"):
+        if os.environ.get(env) and Path(os.environ[env]).exists():
+            found.append((os.environ[env], "headless" in os.environ[env].lower() and "shell" in os.environ[env].lower()))
+    roots = [os.environ.get("PLAYWRIGHT_BROWSERS_PATH") or "", "/opt/pw-browsers", str(Path.home() / ".cache" / "ms-playwright")]
+    for root in filter(None, roots):
+        for exe in sorted(Path(root).glob("chromium_headless_shell-*/*/chrome-headless-shell")):
+            found.append((str(exe), True))
+    for name in ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome", "msedge"):
+        path = shutil.which(name)
+        if path:
+            found.append((path, False))
+    for path in ("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                 "C:/Program Files/Google/Chrome/Application/chrome.exe"):
+        if Path(path).exists():
+            found.append((path, False))
+    return list(dict.fromkeys(found))
+
+
+@command("report", "pdf", help="Write the report as a PDF (renders the HTML page with headless Chrome/Chromium)",
+         id_arg="RUN_ID", payload="optional", flags=("out",), spec=REPORT_HTML_SPEC,
+         example=f"report pdf 1 --out reports/run_1.pdf --json '{_REPORT_EXAMPLE}'")
+def report_pdf(ctx: Ctx) -> Any:
+    run, report, idea, reactions, analysis, research = _report_parts(ctx)
+    candidates = _chrome_candidates()
+    if not candidates:
+        raise CliError("no Chrome or Chromium found to render the PDF",
+                       "Install Google Chrome or Chromium (or set SOCIALSIM_CHROME to its path), or ask for the html format "
+                       "and use the browser's Print > Save as PDF")
+    page = render_html(report, idea, reactions, analysis, research)
+    out = _out_path(ctx, run, "pdf").resolve()
+    errors: list[str] = []
+    with tempfile.TemporaryDirectory() as tmp:
+        src = Path(tmp) / "report.html"
+        src.write_text(page, encoding="utf-8")
+        for chrome, is_shell in candidates:
+            out.unlink(missing_ok=True)
+            cmd = [chrome, *([] if is_shell else ["--headless=new"]), "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage",
+                   "--disable-background-networking", "--disable-sync", "--disable-extensions", "--no-first-run",
+                   "--no-default-browser-check", "--no-pdf-header-footer", f"--user-data-dir={tmp}/profile",
+                   f"--print-to-pdf={out}", src.as_uri()]
+            try:
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=25, stdin=subprocess.DEVNULL)
+            except (OSError, subprocess.TimeoutExpired) as e:
+                errors.append(f"{Path(chrome).name}: {e.__class__.__name__}")
+                continue
+            if out.exists() and out.stat().st_size > 0:
+                return {"run_id": run.id, "format": "pdf", "file": str(out), "bytes": out.stat().st_size}
+            errors.append(f"{Path(chrome).name}: exit {proc.returncode}")
+    raise CliError("could not render the PDF (" + "; ".join(errors) + ")",
+                   "Use the html format and print it to PDF from the browser, or set SOCIALSIM_CHROME to a working Chrome/Chromium")

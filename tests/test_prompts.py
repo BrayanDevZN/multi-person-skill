@@ -141,5 +141,6 @@ def test_prompts_have_required_sections(name):
 def test_orchestrator_asks_about_persona_research_and_html_report():
     orch = FILES["orchestrator.md"]
     assert "research_mode" in orch and "WebSearch" in orch
-    assert "report html" in orch and "HTML REPORT" in orch
+    assert "AskUserQuestion" in orch and "Em que formato quer o relatório" in orch
+    assert all(f"report {f}" in orch for f in ("html", "pdf", "text"))
     assert "pesquisar na web" in orch  # the question asked to the user

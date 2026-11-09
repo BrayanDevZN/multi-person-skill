@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img alt="Testes" src="https://img.shields.io/badge/testes-70_passando-2EA44F?style=flat-square&logo=pytest&logoColor=white">
+  <img alt="Testes" src="https://img.shields.io/badge/testes-71_passando-2EA44F?style=flat-square&logo=pytest&logoColor=white">
   <img alt="pytest" src="https://img.shields.io/badge/pytest-8%2B-0A9EDC?style=flat-square&logo=pytest&logoColor=white">
   <img alt="Bash" src="https://img.shields.io/badge/wrapper-Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white">
   <img alt="Setuptools" src="https://img.shields.io/badge/build-setuptools-6C757D?style=flat-square&logo=python&logoColor=white">
@@ -89,7 +89,8 @@ Os comandos do banco rodam sempre a partir da raiz do projeto, onde fica o `bin/
  6. um subagente por persona, em paralelo (lotes de até 10), ciclo ReAct
  7. valida cada resultado e tenta corrigir uma vez; se falhar, registra como failed
  8. salva tudo, fecha o run e gera o relatório com números do banco
- 9. monta um relatório HTML bonito (recomendações, melhorias, próximos passos) em reports/
+ 9. pergunta em que formato você quer o relatório (HTML, PDF ou texto) e só então o gera, com
+    recomendações, melhorias e próximos passos, em reports/
        │
        ▼
  análise no chat + relatório HTML (veredito, números, segmentos, objeções, falas, recomendações)
@@ -151,8 +152,7 @@ simula com 15 personas esse anúncio: "Emagreça sem contar calorias. Teste grá
 
 ## O que sai no relatório
 
-Depois que todas as personas respondem, o agente principal escreve a análise no chat e gera um **relatório HTML** em
-`reports/run_<id>.html` (abre em qualquer navegador, funciona offline, tema claro e escuro). Os números, gráficos, tabela de
+Depois que todas as personas respondem, o agente principal **pergunta em que formato você quer o relatório** (você marca **HTML**, **PDF** ou **texto**, podendo escolher mais de um), escreve a análise no chat e gera o arquivo em `reports/`: `run_<id>.html` (abre em qualquer navegador, funciona offline, tema claro e escuro), `run_<id>.pdf` (precisa de Chrome ou Chromium instalado) ou `run_<id>.md` (texto simples). Os números, gráficos, tabela de
 segmentos, objeções e cartões de cada persona vêm do banco; o texto (veredito, recomendações, melhorias no anúncio, sugestão
 de novo anúncio, riscos e próximos passos) vem da análise do agente.
 
@@ -184,9 +184,9 @@ Todos os números vêm do `report run`, nunca de estimativa do modelo.
 ├── src/socialsim/                # CLI + modelos SQLAlchemy
 │   ├── cli.py, core.py, db.py, models.py, registry.py, validation.py, report_html.py
 │   └── commands/                 # ideas, personas, runs, admin
-├── tests/                        # pytest (70 testes)
+├── tests/                        # pytest (71 testes)
 ├── data/socialsim.db             # banco local, criado automaticamente, fora do git
-├── reports/run_<id>.html         # relatórios gerados, fora do git
+├── reports/run_<id>.{html,pdf,md} # relatórios gerados, fora do git
 ├── assets/banner.svg             # banner animado deste README
 └── social-sim.zip                # projeto empacotado, pronto para usar
 ```
@@ -218,7 +218,7 @@ JSON: `{"ok": true, "data": ...}` ou `{"ok": false, "error": ..., "hint": ...}`.
 | Estado | `state get \| update` |
 | Rodadas | `run start \| status \| finish \| list \| resume \| delete` |
 | Reações | `reaction save \| get \| list \| delete` |
-| Relatório | `report run \| html` |
+| Relatório | `report run \| html \| pdf \| text` |
 
 ```bash
 bin/socialsim commands                 # catálogo completo com campos e exemplos
@@ -258,7 +258,7 @@ Referência completa: [`cli_reference.md`](.claude/skills/social-sim/prompts/cli
 ```bash
 bin/socialsim init                       # cria o .venv e o banco
 .venv/bin/python -m pip install -e ".[dev]"
-.venv/bin/python -m pytest               # 70 testes
+.venv/bin/python -m pytest               # 71 testes
 ```
 
 Para gerar o ZIP de novo depois de mudar algo:

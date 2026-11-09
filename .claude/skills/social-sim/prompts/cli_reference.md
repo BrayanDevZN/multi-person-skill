@@ -285,6 +285,7 @@ prefer `reaction save` to overwrite a result. `bin/socialsim reaction delete 12 
 Rates are `null` when there are no OK reactions. Numbers in your final analysis must come from this report.
 
 ### `report html`
+There are three report commands with the same payload: `report html`, `report pdf` and `report text`. Ask the user which format they want before running any of them.
 `bin/socialsim report html 1 --file analysis.json --out reports/run_1.html` writes a self-contained, styled HTML page (works offline, light and dark theme):
 KPI cards, actions and sentiment charts, segment table, ranked objections, one card per persona, the ad tested, the market research used,
 and your written analysis. All numbers come from the database. Refuses while any reaction of the run is still `pending`.
@@ -295,3 +296,10 @@ Optional payload fields (all strings or lists of strings): `title`, `verdict`, `
 ```
 bin/socialsim report html 1 --out reports/run_1.html --json '{"verdict": "Interest is concentrated in small shop owners.", "recommendations": ["Show the price in the ad"], "next_steps": ["Re-run with 20 personas"]}'
 ```
+
+### `report pdf`
+Same content and payload as `report html`, written as a PDF (the HTML page printed by a headless Chrome or Chromium). `--out` defaults to `reports/run_<id>.pdf`.
+Fails with a hint when no Chrome or Chromium is installed (set `SOCIALSIM_CHROME` to its path); then use `report html` and print it from the browser.
+
+### `report text`
+Same content and payload as `report html`, written as plain Markdown text. `--out` defaults to `reports/run_<id>.md`.

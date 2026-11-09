@@ -46,3 +46,11 @@ def test_html_report_rejects_unknown_fields_and_missing_run(seeded, tmp_path):
     _finish_run(seeded, tmp_path)
     assert not seeded("report", "html", "1", "--out", str(tmp_path / "x.html"), bogus="x").ok
     assert not seeded("report", "html", "99", "--out", str(tmp_path / "y.html")).ok
+
+
+def test_text_report_has_numbers_and_analysis(seeded, tmp_path):
+    _finish_run(seeded, tmp_path)
+    out = tmp_path / "run.md"
+    assert seeded("report", "text", "1", "--out", str(out), verdict="Bom começo", next_steps=["Rodar com 20 personas"]).ok
+    text = out.read_text(encoding="utf-8")
+    assert text.startswith("# ") and "Bom começo" in text and "33%" in text and "1. Rodar com 20 personas" in text

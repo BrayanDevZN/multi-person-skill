@@ -51,6 +51,7 @@ ol.steps{margin:0;padding-left:22px}ol.steps li{margin:6px 0}
 .ad{background:var(--soft);border:1px dashed var(--accent);border-radius:12px;padding:14px 16px;font-size:17px}
 .ad small{display:block;color:var(--muted);font-size:12px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
 .warnbox{border-left:5px solid var(--mid)}
+@media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.card,.persona,tr{break-inside:avoid}h2{break-after:avoid}body{background:#fff}}
 footer{color:var(--muted);font-size:13px;margin-top:36px;text-align:center}
 @media (max-width:560px){.row{grid-template-columns:110px 1fr 40px}header h1{font-size:24px}}
 """
@@ -181,3 +182,53 @@ def render_html(report: dict[str, Any], idea: dict[str, Any], reactions: list[di
     return ('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{_e(title)}</title><style>{CSS}</style></head><body>{"".join(parts)}</body></html>')
+
+
+def render_text(report: dict[str, Any], idea: dict[str, Any], reactions: list[dict[str, Any]],
+                analysis: dict[str, Any]) -> str:
+    """Same content as the HTML page, as plain Markdown text (readable in any editor or chat)."""
+    c = report["counts"]
+    run = report["run"]
+    L: list[str] = [f"# {analysis.get('title') or 'Relatório: ' + idea['name']}", "",
+                    f"Ideia: {idea['name']} · run {run['id']} · {(run.get('finished_at') or run.get('started_at') or '')[:16].replace('T', ' ')}", ""]
+
+    def bullets(title: str, items: list[str] | None) -> None:
+        if items:
+            L.extend([f"## {title}", ""] + [f"- {i}" for i in items] + [""])
+
+    if analysis.get("verdict"):
+        L.extend(["## Veredito", "", analysis["verdict"], ""])
+    L.extend(["## Números", "",
+              f"- Personas simuladas: {c['planned']} (falhas: {c['failed']})",
+              f"- Taxa de conversão: {_pct(report['conversion_rate'])}",
+              f"- Taxa de engajamento: {_pct(report['engagement_rate'])}",
+              f"- Intenção média de compra: {_num(report['avg_purchase_intent'])}/10", ""])
+    if idea.get("ad_copy"):
+        L.extend(["## Anúncio testado", "", idea["ad_copy"], ""])
+    if analysis.get("rewritten_ad"):
+        L.extend(["## Sugestão de novo anúncio", "", analysis["rewritten_ad"], ""])
+    if report["by_segment"]:
+        L.extend(["## Por segmento", ""])
+        for seg, b in report["by_segment"].items():
+            L.append(f"- {seg}: {b['n']} persona(s), intenção média {_num(b['avg_purchase_intent'])}/10, "
+                     f"{b['conversions']} conversão(ões), {b['positive']} positiva(s), {b['negative']} negativa(s)")
+        L.append("")
+    if report["top_objections"]:
+        L.extend(["## Principais objeções", ""] + [f"- {o['objection']} ({o['count']})" for o in report["top_objections"][:8]] + [""])
+    L.extend(["## Cada persona", ""])
+    for r in sorted(reactions, key=lambda x: -(x["purchase_intent"] or 0)):
+        L.append(f"- {r['name']}, {r['age']} ({r.get('segment') or ''}): {ACTION_LABEL.get(r['action'], r['action'])}, "
+                 f"intenção {r['purchase_intent']}/10, {SENTIMENT_LABEL.get(r['sentiment'], r['sentiment']).lower()}"
+                 + (f'. "{r["comment"]}"' if r.get("comment") else ""))
+    L.append("")
+    bullets("O que funcionou", analysis.get("strengths"))
+    bullets("Recomendações para a ideia e o produto", analysis.get("recommendations"))
+    bullets("Melhorias no anúncio", analysis.get("ad_improvements"))
+    bullets("Riscos", analysis.get("risks"))
+    if analysis.get("next_steps"):
+        L.extend(["## Próximos passos", ""] + [f"{i}. {x}" for i, x in enumerate(analysis["next_steps"], 1)] + [""])
+    L.extend(["## Ressalvas", "",
+              "Isto é uma simulação feita por um modelo de linguagem, não pesquisa de mercado. Tende a ser mais educada e mais "
+              "razoável que gente real. Use para levantar objeções e hipóteses a testar com usuários de verdade, não como prova de demanda.", ""])
+    L.extend(f"- {x}" for x in analysis.get("caveats") or [])
+    return "\n".join(L).rstrip() + "\n"
