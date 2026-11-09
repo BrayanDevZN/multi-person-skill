@@ -80,8 +80,8 @@ Os comandos do banco rodam sempre a partir da raiz do projeto, onde fica o `bin/
        ▼
  1. pesquisa o mercado na web ──► salva os achados (research)
  2. define de 3 a 8 segmentos (inclui ao menos um hostil ou mal encaixado)
- 3. decide quantas personas (de 8 a 40) e justifica em uma frase
- 4. reaproveita personas do banco e cria só as que faltam (checa duplicatas)
+ 3. propõe quantas personas (de 8 a 40), justifica e PERGUNTA a você: manter, mais ou menos?
+ 4. só depois da sua resposta: reaproveita personas do banco e cria só as que faltam
  5. abre o run  ◄── antes de qualquer agente, para sobreviver a interrupções
  6. um subagente por persona, em paralelo (lotes de até 10), ciclo ReAct
  7. valida cada resultado e tenta corrigir uma vez; se falhar, registra como failed
@@ -122,7 +122,7 @@ A persona também nunca pode dizer que é uma IA ou uma simulação.
 
 | Você diz... | Modo | O que acontece |
 |---|---|---|
-| Só dá a ideia (e talvez o anúncio) | **Autônomo** (padrão) | Pesquisa, escolhe segmentos e quantidade, reaproveita ou cria personas, simula todas e analisa |
+| Só dá a ideia (e talvez o anúncio) | **Autônomo** (padrão) | Pesquisa, propõe segmentos e quantidade, **espera a sua aprovação** (manter, aumentar ou diminuir), então cria personas, simula todas e analisa |
 | Descreve personas ou nomeia as salvas | **Manual** | Sem pesquisa e sem planejar o público: faz exatamente o pedido |
 | Quer continuar uma rodada interrompida | **Retomada** | `run resume` e simula só as personas pendentes ou que falharam |
 | Pergunta sobre resultados antigos | **Consulta** | Usa relatórios e listas, sem simular |
@@ -214,6 +214,7 @@ Referência completa: [`cli_reference.md`](.claude/skills/social-sim/prompts/cli
 
 - **Só o orquestrador escreve no banco.** Os subagentes não têm ferramentas: devolvem JSON e pronto. Uma falha de
   agente não corrompe dados.
+- **Confirmação antes de gastar.** Depois da pesquisa, a skill mostra o plano (segmentos, número de personas, custo em subagentes) e só segue quando você aprova, aumenta ou diminui. Dizer "faz direto" ou fixar um número pula a pergunta.
 - **O run abre antes dos agentes**, então o progresso sobrevive a interrupções e pode ser retomado.
 - **Contra o viés de "educação" do modelo:** ignorar é o resultado padrão, há contextos ruins de propósito, todo
   público inclui segmentos hostis e o resumo de mercado nunca traz conclusões sobre o produto.
