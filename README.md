@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img alt="Testes" src="https://img.shields.io/badge/testes-65_passando-2EA44F?style=flat-square&logo=pytest&logoColor=white">
+  <img alt="Testes" src="https://img.shields.io/badge/testes-70_passando-2EA44F?style=flat-square&logo=pytest&logoColor=white">
   <img alt="pytest" src="https://img.shields.io/badge/pytest-8%2B-0A9EDC?style=flat-square&logo=pytest&logoColor=white">
   <img alt="Bash" src="https://img.shields.io/badge/wrapper-Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white">
   <img alt="Setuptools" src="https://img.shields.io/badge/build-setuptools-6C757D?style=flat-square&logo=python&logoColor=white">
@@ -81,6 +81,7 @@ Os comandos do banco rodam sempre a partir da raiz do projeto, onde fica o `bin/
  1. pesquisa o mercado na web ──► salva os achados (research)
  2. define de 3 a 8 segmentos (inclui ao menos um hostil ou mal encaixado)
  3. propõe quantas personas (de 8 a 40), justifica e PERGUNTA a você: manter, mais ou menos?
+    e se as personas podem pesquisar na web antes de reagir (opcional, desligado por padrão)
  4. só depois da sua resposta: reaproveita personas do banco
  4b. para cada persona nova, pesquisa na web gente real daquele perfil (rotina, plataformas, gírias,
     atitude com anúncios) e só então cria a persona, ancorada nesses achados
@@ -88,9 +89,10 @@ Os comandos do banco rodam sempre a partir da raiz do projeto, onde fica o `bin/
  6. um subagente por persona, em paralelo (lotes de até 10), ciclo ReAct
  7. valida cada resultado e tenta corrigir uma vez; se falhar, registra como failed
  8. salva tudo, fecha o run e gera o relatório com números do banco
+ 9. monta um relatório HTML bonito (recomendações, melhorias, próximos passos) em reports/
        │
        ▼
- análise final (veredito, números, segmentos, objeções, falas, recomendações)
+ análise no chat + relatório HTML (veredito, números, segmentos, objeções, falas, recomendações)
 ```
 
 Cada persona recebe o mesmo anúncio, uma plataforma sua (Instagram, TikTok, LinkedIn...) e um contexto de momento
@@ -120,6 +122,14 @@ Regras de consistência checadas pelo orquestrador:
 
 A persona também nunca pode dizer que é uma IA ou uma simulação.
 
+### Personas que pesquisam (opcional)
+
+Por padrão a persona reage só com o anúncio, a memória e o resumo de mercado. Se você ativar o **modo pesquisa**, cada
+agente de persona ganha a mesma ferramenta de busca na web (`WebSearch`) que o agente principal usa, mas **só pesquisa se
+aquela pessoa realmente procuraria algo** (o preço, avaliações, a empresa, uma alternativa mais barata). Não é obrigatório:
+a maioria só dá scroll. São no máximo 2 buscas, escritas como a pessoa digitaria, e o que ela encontrou aparece no
+`react_trace` e pode mudar a decisão. Fica mais realista, porém mais lento e mais caro.
+
 ## Modos de uso
 
 | Você diz... | Modo | O que acontece |
@@ -140,6 +150,13 @@ simula com 15 personas esse anúncio: "Emagreça sem contar calorias. Teste grá
 ```
 
 ## O que sai no relatório
+
+Depois que todas as personas respondem, o agente principal escreve a análise no chat e gera um **relatório HTML** em
+`reports/run_<id>.html` (abre em qualquer navegador, funciona offline, tema claro e escuro). Os números, gráficos, tabela de
+segmentos, objeções e cartões de cada persona vêm do banco; o texto (veredito, recomendações, melhorias no anúncio, sugestão
+de novo anúncio, riscos e próximos passos) vem da análise do agente.
+
+Conteúdo da análise:
 
 1. **Veredito:** como o público recebeu a ideia, em duas ou três frases.
 2. **Números:** personas simuladas, taxa de conversão, taxa de engajamento, intenção média de compra e falhas.
@@ -165,10 +182,11 @@ Todos os números vêm do `report run`, nunca de estimativa do modelo.
 │       └── persona_agent.md      # template do subagente de cada persona
 ├── bin/socialsim                 # wrapper: cria o .venv e instala dependências na 1ª execução
 ├── src/socialsim/                # CLI + modelos SQLAlchemy
-│   ├── cli.py, core.py, db.py, models.py, registry.py, validation.py
+│   ├── cli.py, core.py, db.py, models.py, registry.py, validation.py, report_html.py
 │   └── commands/                 # ideas, personas, runs, admin
-├── tests/                        # pytest (65 testes)
+├── tests/                        # pytest (70 testes)
 ├── data/socialsim.db             # banco local, criado automaticamente, fora do git
+├── reports/run_<id>.html         # relatórios gerados, fora do git
 ├── assets/banner.svg             # banner animado deste README
 └── social-sim.zip                # projeto empacotado, pronto para usar
 ```
@@ -200,12 +218,13 @@ JSON: `{"ok": true, "data": ...}` ou `{"ok": false, "error": ..., "hint": ...}`.
 | Estado | `state get \| update` |
 | Rodadas | `run start \| status \| finish \| list \| resume \| delete` |
 | Reações | `reaction save \| get \| list \| delete` |
-| Relatório | `report run` |
+| Relatório | `report run \| html` |
 
 ```bash
 bin/socialsim commands                 # catálogo completo com campos e exemplos
 bin/socialsim persona list --json '{"min_age": 30, "tag": "lote-1"}'
 bin/socialsim report run 1
+bin/socialsim report html 1 --out reports/run_1.html --file analise.json
 bin/socialsim query --sql "SELECT segment, COUNT(*) n FROM personas GROUP BY segment"
 ```
 
@@ -221,6 +240,7 @@ Referência completa: [`cli_reference.md`](.claude/skills/social-sim/prompts/cli
 - **O run abre antes dos agentes**, então o progresso sobrevive a interrupções e pode ser retomado.
 - **Contra o viés de "educação" do modelo:** ignorar é o resultado padrão, há contextos ruins de propósito, todo
   público inclui segmentos hostis e o resumo de mercado nunca traz conclusões sobre o produto.
+- **Relatório com números do banco.** O HTML é gerado pela CLI: o agente só escreve o texto, e a página se recusa a sair enquanto houver persona pendente.
 - **Nenhuma análise com resultado parcial.** Só depois que todos os agentes voltam ou são marcados como falhos.
 - **Os testes checam os prompts contra a CLI:** todo comando citado nos prompts precisa existir e todo exemplo de
   JSON precisa passar na validação.
@@ -238,7 +258,7 @@ Referência completa: [`cli_reference.md`](.claude/skills/social-sim/prompts/cli
 ```bash
 bin/socialsim init                       # cria o .venv e o banco
 .venv/bin/python -m pip install -e ".[dev]"
-.venv/bin/python -m pytest               # 65 testes
+.venv/bin/python -m pytest               # 70 testes
 ```
 
 Para gerar o ZIP de novo depois de mudar algo:

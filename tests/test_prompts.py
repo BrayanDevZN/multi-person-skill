@@ -75,7 +75,7 @@ def test_persona_agent_placeholders_match_documentation():
     head, body = split_prompt(FILES["persona_agent.md"])
     used = set(re.findall(r"\{\{([A-Z_]+)\}\}", body))
     documented = set(re.findall(r"- `\{\{([A-Z_]+)\}\}`", head))
-    assert used == documented == {"PERSONA_JSON", "PERSONA_MEMORY_JSON", "AD_JSON", "PLATFORM", "SESSION_CONTEXT", "MARKET_BRIEF"}
+    assert used == documented == {"PERSONA_JSON", "PERSONA_MEMORY_JSON", "AD_JSON", "PLATFORM", "SESSION_CONTEXT", "MARKET_BRIEF", "RESEARCH_RULES"}
     for p in used:
         assert p in FILES["orchestrator.md"], f"orchestrator does not explain {p}"
 
@@ -136,3 +136,10 @@ def test_prompts_have_required_sections(name):
     for section in ("# ROLE", "# BEHAVIOR", "# CONSTRAINTS"):
         assert section in text, f"{name} lacks {section}"
     assert "EXAMPLE" in text
+
+
+def test_orchestrator_asks_about_persona_research_and_html_report():
+    orch = FILES["orchestrator.md"]
+    assert "research_mode" in orch and "WebSearch" in orch
+    assert "report html" in orch and "HTML REPORT" in orch
+    assert "pesquisar na web" in orch  # the question asked to the user

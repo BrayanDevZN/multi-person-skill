@@ -34,7 +34,8 @@ database and are reused across simulations.
 - Simulate each persona in its own subagent, in parallel batches of at most 10, all agents of a batch in one message.
 - Before creating any new persona, research real people of that profile on the web (WebSearch), save the facts with `research add` and give them to the generator. Do not invent personas from imagination alone.
 - Do not analyze until every persona agent has returned or been recorded as failed. Never summarize partial results.
-- Persona count is 8 to 40 in autonomous mode. Propose it with a one-sentence reason, then ASK the user whether to keep, increase or decrease it, and wait for the answer before creating personas or opening the run. Skip the question only if the user fixed a number or said to run without asking.
+- Persona count is 8 to 40 in autonomous mode. Propose it with a one-sentence reason, then ASK the user whether to keep, increase or decrease it, and also whether the personas may search the web before reacting (optional, off by default; each persona searches only if that person would), and wait for the answers before creating personas or opening the run. Skip the question only if the user fixed a number or said to run without asking.
+- After `report run`, write an HTML report with `report html` (recommendations, ad improvements, next steps) and give the user its path, besides the short summary in the chat.
 - Numbers in the final analysis come from `report run`. Report failures and weak results as plainly as good ones.
 - Always close with the caveat: this is a language-model simulation, not market validation; use it to surface objections and hypotheses.
 - Answer in the language the user wrote in. Prompts sent to subagents stay in English.

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy import select
@@ -11,6 +12,7 @@ from socialsim.core import Ctx, get_or_404, need_confirm, need_id, paginate, to_
 from socialsim.models import (ACTIONS, REACTION_STATUSES, RUN_STATUSES, SENTIMENTS, Idea, Persona,
                               Reaction, Run, utcnow)
 from socialsim.registry import command
+from socialsim.report_html import render_html
 from socialsim.validation import CliError, Field, as_list, validate
 
 RUN_START_SPEC = {
@@ -37,6 +39,17 @@ REACTION_LIST_SPEC = {
     "action": Field("enum", choices=ACTIONS), "sentiment": Field("enum", choices=SENTIMENTS),
     "status": Field("enum", choices=REACTION_STATUSES),
     "min_intent": Field("int", min=0, max=10), "max_intent": Field("int", min=0, max=10),
+}
+REPORT_HTML_SPEC = {
+    "title": Field("str"),
+    "verdict": Field("str"),
+    "strengths": Field("list_str"),
+    "recommendations": Field("list_str"),
+    "ad_improvements": Field("list_str"),
+    "rewritten_ad": Field("str"),
+    "risks": Field("list_str"),
+    "next_steps": Field("list_str"),
+    "caveats": Field("list_str"),
 }
 MEMORY_CAP = 50
 
@@ -285,3 +298,28 @@ def report_run(ctx: Ctx) -> Any:
         "failed": [{"persona_id": r.persona_id, "error": r.error} for r in run.reactions if r.status == "failed"],
         "pending_persona_ids": [r.persona_id for r in run.reactions if r.status == "pending"],
     }
+
+
+@command("report", "html", help="Write a self-contained HTML report of a finished run (numbers from the database + your analysis)",
+         id_arg="RUN_ID", payload="optional", flags=("out",), spec=REPORT_HTML_SPEC,
+         example="""report html 1 --out reports/run_1.html --json '{"verdict": "Interest is concentrated in owners of small shops.", "recommendations": ["Show the price in the ad"]}'""")
+def report_html(ctx: Ctx) -> Any:
+    run = _get_run(ctx)
+    analysis = validate(ctx.payload or {}, REPORT_HTML_SPEC, partial=True)
+    counts = _counts(run)
+    if counts["pending"]:
+        raise CliError(f"run {run.id} still has {counts['pending']} pending reaction(s)",
+                       "Finish every persona first (reaction save, then run finish) or use run resume")
+    report = report_run(ctx)
+    idea = to_dict(run.idea, ("id", "name", "description", "ad_copy"))
+    reactions = [{
+        "name": r.persona.name, "age": r.persona.age, "occupation": r.persona.occupation, "segment": r.persona.segment,
+        "action": r.action, "sentiment": r.sentiment, "purchase_intent": r.purchase_intent, "comment": r.comment,
+        "objections": r.objections,
+    } for r in run.reactions if r.status == "ok"]
+    research = [{"topic": x.topic, "finding": x.finding} for x in run.idea.research]
+    page = render_html(report, idea, reactions, analysis, research)
+    out = Path(ctx.opts.get("out") or f"reports/run_{run.id}.html").expanduser()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(page, encoding="utf-8")
+    return {"run_id": run.id, "file": str(out.resolve()), "bytes": len(page.encode("utf-8"))}

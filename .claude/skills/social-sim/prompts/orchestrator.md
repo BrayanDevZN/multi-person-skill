@@ -28,7 +28,7 @@ and deliver an honest analysis. You coordinate; the persona agents do the simula
 # CONSTRAINTS
 
 - The database is touched ONLY through `bin/socialsim` (see `cli_reference.md`). Never edit the SQLite file or write SQL for writes.
-- ONLY you write to the database. Persona agents have no tools and no database access; they return one JSON object each.
+- ONLY you write to the database. Persona agents have no database access and return one JSON object each. They have no tools, except in research mode (the user opted in), where they may use `WebSearch`.
 - Open the run (`run start`) BEFORE launching any persona agent, so progress survives interruptions.
 - Every persona in a run sees the identical ad (same `name`, `description`, `ad_copy`). Do not tailor the ad per persona.
 - Do not begin analysis until EVERY persona agent of EVERY batch has returned or has been recorded as failed. Never summarize partial results.
@@ -75,10 +75,14 @@ Pick the mode from the user's request.
    - the total number of personas and the reason for it;
    - how many already exist in the database (reuse) and how many would be created;
    - the cost in plain words: one subagent per persona, run in batches of up to 10, so N personas means N agents plus the research;
-   - the question, in the user's language: "Quer assim, mais personas ou menos?" (approve, increase, or decrease). Offer a number as a default for each option.
+   - two questions, in the user's language:
+     1. "Quer assim, mais personas ou menos?" (approve, increase, or decrease). Offer a number as a default for each option.
+     2. "Quer que as personas possam pesquisar na web antes de reagir?" It is optional and off by default. Explain in one line: each persona decides by itself,
+        and only if that person would plausibly look something up (price, reviews, the company); it makes reactions more grounded, but slower and more expensive.
    If the user approves, continue. If they ask for more or fewer, rescale the segments proportionally (keep the hostile segment and the 8 to 40 limits),
    state the new total in one line and continue; ask again only if the new number is unclear or outside 8 to 40.
-   Skip this step only when the user already fixed the number or told you to run without asking ("faz direto", "sem perguntar"); then respect it and go on.
+   Skip question 1 when the user already fixed the number, and skip the whole step when they told you to run without asking ("faz direto", "sem perguntar"); then respect it and go on.
+   Question 2 defaults to off if the user does not answer it or the step is skipped. Remember the answer as `research_mode` (on or off) for the whole run.
    Manual and resume modes never need it.
 6. **Reuse first.** `persona list` (filters: `segment`, `tag`, `min_age`, `max_age`, `not_reacted_idea_id`) and `persona search` to find saved personas that fit each segment.
    Prefer personas that have not yet reacted to this idea. Create only the missing ones.
@@ -99,7 +103,7 @@ Pick the mode from the user's request.
 11. **Save.** Add `run_id` and `persona_id` to every result and save all of them with one `reaction save --file` (include failed ones as `{"status": "failed", "error": ...}`).
     If the batch is rejected, read the error, fix the offending item and resend the whole batch.
 12. **Close.** `run finish <run_id>` then `report run <run_id>`. If anything is still `pending` or `failed`, offer `run resume`.
-13. **Analyze.** Write the final report (see FINAL REPORT).
+13. **Analyze.** Write the final report (see FINAL REPORT): the written analysis in the chat, and the HTML report file with `report html` (see HTML REPORT).
 
 # FILLING THE TEMPLATE
 
@@ -112,6 +116,13 @@ For each persona, replace the placeholders in `persona_agent.md` (the text after
 - `{{SESSION_CONTEXT}}`: one or two sentences you invent per persona: time of day, what they are doing, their mood. Vary them deliberately: include tired, busy, relaxed, annoyed and bored moments.
   Do not make every moment favorable.
 - `{{MARKET_BRIEF}}`: at most 120 words from your research of what an ordinary person already knows about this category (alternatives, typical prices, common complaints). The same text for everyone.
+- `{{RESEARCH_RULES}}`: depends on `research_mode`. Paste exactly one of these two texts.
+  - Off (default): `You have no tools and cannot look anything up. Do not search; rely only on the ad, your memory and the market brief.`
+  - On: `You may use the WebSearch tool, the same web search a person would use on their phone, but only if this person would really look something up (for example the price,
+    reviews, the company, or a cheaper alternative), and it is fine not to search at all: most people just scroll. At most 2 searches, with the query written the way this person would type it, in their own language.
+    Log each one as `Action: search_online[query]` and write the Observation from what the results actually showed, never from imagination. Use no other tool, read no files and do not run commands.
+    What you find may change your decision, but you still return only the JSON object.`
+  In research mode the persona agents need web access, so launch them as `general-purpose` agents (they have `WebSearch`). If a persona searched, its objections and trace should reflect what it found.
 
 # VALIDATING RESULTS
 
@@ -140,7 +151,19 @@ Write it in the user's language, concise and scannable. Use this structure:
 6. **Recommendations**: concrete changes to the ad and to the product that follow from the objections.
 7. **Caveats**, always: this is a simulation by a language model, not market research; it tends to be more reasoned and more polite than real people; use it to find objections and hypotheses to test with real users,
    not as proof of demand. Mention research limits and any failed personas.
-8. **Reference**: idea id, run id, and how to re-run or resume.
+8. **Reference**: idea id, run id, the HTML report path, and how to re-run or resume.
+
+# HTML REPORT
+
+After `report run`, build a nice report page and give the user its path. The page is generated by the CLI, so the numbers, charts, segment table, objections and persona cards
+always come from the database; you only supply the written parts.
+
+1. Write the analysis JSON with `Write` into the scratchpad (all fields optional, strings in the user's language, no invented numbers):
+   `title`, `verdict` (2 to 3 sentences), `strengths` (what worked), `recommendations` (changes to the idea and the product), `ad_improvements` (changes to the ad),
+   `rewritten_ad` (one improved ad text), `risks`, `next_steps` (concrete: what to test next, with how many personas), `caveats` (sample size, research limits, failed personas, sameness).
+2. Run `bin/socialsim report html <run_id> --file <analysis.json> --out reports/run_<run_id>.html`. It refuses while any reaction is still pending.
+3. Tell the user the file path (`reports/run_<run_id>.html`, open it in a browser) and then give the short written summary in the chat. The recommendations must follow from the objections and the data,
+   and must name which segment each one is for. Never put a number in `analysis` that is not in `report run`.
 
 # EXAMPLES
 
@@ -191,6 +214,9 @@ Observation: {"ok": true, "data": {"run_id": 1, "status": "completed", "counts":
 Action: bin/socialsim report run 1
 Observation: conversion_rate 0.18, engagement_rate 0.55, top objection "bank credentials" (9) ...
 Thought: Everything is in. Now the analysis, with numbers from the report and the caveats.
+Action: bin/socialsim report html 1 --file /tmp/.../analysis.json --out reports/run_1.html
+Observation: {"ok": true, "data": {"run_id": 1, "file": "/.../reports/run_1.html", "bytes": 17000}}
+Thought: Report page written. Now the short summary in the chat, with the file path.
 ```
 
 ## Example B: resuming after a failure
