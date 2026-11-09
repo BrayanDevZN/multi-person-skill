@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/BrayanDevZN/multi-person-skill/raw/main/dist/social-sim.zip"><img alt="Baixar o ZIP" src="https://img.shields.io/badge/%E2%AC%87_BAIXAR-social--sim.zip-D97757?style=for-the-badge"></a>
+  <a href="https://github.com/BrayanDevZN/multi-person-skill/raw/main/social-sim.zip"><img alt="Baixar o ZIP" src="https://img.shields.io/badge/%E2%AC%87_BAIXAR-social--sim.zip-D97757?style=for-the-badge"></a>
 </p>
 
 Uma skill do Claude Code que simula um público de usuários de redes sociais vendo o anúncio da sua ideia
@@ -55,7 +55,7 @@ Requisitos: Python 3.11+, `python3-venv`, Claude Code e acesso à rede na primei
 
 **Opção 1: pelo ZIP pronto**
 
-1. Baixe o [`social-sim.zip`](https://github.com/BrayanDevZN/multi-person-skill/raw/main/dist/social-sim.zip) (fica em `dist/social-sim.zip` no repositório) e extraia.
+1. Baixe o [`social-sim.zip`](https://github.com/BrayanDevZN/multi-person-skill/raw/main/social-sim.zip) (fica na raiz do repositório) e extraia.
 2. Abra a pasta extraída no Claude Code. A skill `.claude/skills/social-sim` é descoberta sozinha.
 3. Peça uma simulação (veja os [exemplos](#exemplos-de-pedidos)).
 
@@ -168,7 +168,7 @@ Todos os números vêm do `report run`, nunca de estimativa do modelo.
 ├── tests/                        # pytest (65 testes)
 ├── data/socialsim.db             # banco local, criado automaticamente, fora do git
 ├── assets/banner.svg             # banner animado deste README
-└── dist/social-sim.zip           # projeto empacotado, pronto para usar
+└── social-sim.zip                # projeto empacotado, pronto para usar
 ```
 
 ## O banco de dados
@@ -240,5 +240,5 @@ bin/socialsim init                       # cria o .venv e o banco
 Para gerar o ZIP de novo depois de mudar algo:
 
 ```bash
-git archive --format=zip --prefix=social-sim/ -o dist/social-sim.zip HEAD -- . ':(exclude)dist'
+git archive --format=zip --prefix=social-sim/ -o social-sim.zip HEAD -- . ':(exclude)social-sim.zip'
 ```
