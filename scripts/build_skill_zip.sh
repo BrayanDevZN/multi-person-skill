@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Builds social-sim-skill.zip for upload at claude.ai (Settings > Skills).
+# Builds social-sim.zip for upload at claude.ai (Settings > Skills).
 # SKILL.md must sit directly inside the single top-level folder: social-sim/SKILL.md
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUT="$ROOT/social-sim-skill.zip"
+OUT="$ROOT/social-sim.zip"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 D="$TMP/social-sim"
 mkdir -p "$D/data"

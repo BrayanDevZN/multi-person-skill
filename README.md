@@ -55,15 +55,9 @@ Requisitos: Python 3.11+, `python3-venv`, Claude Code e acesso à rede na primei
 
 **Opção 1: pelo ZIP pronto**
 
-1. Baixe o [`social-sim.zip`](https://github.com/BrayanDevZN/multi-person-skill/raw/main/social-sim.zip) (fica na raiz do repositório) e extraia.
-2. Abra a pasta extraída no Claude Code. A skill `.claude/skills/social-sim` é descoberta sozinha.
+1. Baixe o [`social-sim.zip`](https://github.com/BrayanDevZN/multi-person-skill/raw/main/social-sim.zip) (fica na raiz do repositório).
+2. No claude.ai, vá em Settings → Skills e faça o upload do ZIP (o `SKILL.md` fica direto em `social-sim/SKILL.md`). No Claude Code, extraia a pasta `social-sim` em `~/.claude/skills/`.
 3. Peça uma simulação (veja os [exemplos](#exemplos-de-pedidos)).
-
-**Opção 1b: upload no Claude (claude.ai → Settings → Skills)**
-
-Use o [`social-sim-skill.zip`](https://github.com/BrayanDevZN/multi-person-skill/raw/main/social-sim-skill.zip), não o `social-sim.zip`.
-Nele o `SKILL.md` fica direto na pasta de topo (`social-sim/SKILL.md`), que é o que o upload exige.
-Para gerar de novo: `scripts/build_skill_zip.sh`.
 
 **Opção 2: pelo repositório**
 
@@ -270,5 +264,5 @@ bin/socialsim init                       # cria o .venv e o banco
 Para gerar o ZIP de novo depois de mudar algo:
 
 ```bash
-git archive --format=zip --prefix=social-sim/ -o social-sim.zip HEAD -- . ':(exclude)social-sim.zip'
+scripts/build_skill_zip.sh
 ```
