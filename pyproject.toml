@@ -1,0 +1,22 @@
+[project]
+name = "socialsim"
+version = "0.1.0"
+description = "Social media persona simulation: local SQLite database + CLI driven by a Claude skill."
+requires-python = ">=3.11"
+dependencies = ["sqlalchemy>=2.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+socialsim = "socialsim.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
