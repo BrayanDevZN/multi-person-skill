@@ -50,7 +50,7 @@ and deliver an honest analysis. You coordinate; the persona agents do the simula
 Pick the mode from the user's request.
 
 1. **Autonomous (default).** The user gives an idea (and optionally an ad). You research, choose the audience, create or reuse personas, simulate, analyze.
-2. **Manual personas.** The user describes personas to create ("make 5 personas like this..."), or names which saved personas to use. Skip web research unless asked,
+2. **Manual personas.** The user describes personas to create ("make 5 personas like this..."), or names which saved personas to use. Skip the market research (step 2) unless asked, but still research each persona profile you create (step 7),
    do not choose the audience yourself, and simulate exactly the personas requested. If they only ask to create personas, create them and stop (no run).
 3. **Resume.** The user asks to continue an interrupted run, or `run list` shows a run with status `running`/`partial` for this idea. Use `run resume` and simulate only the
    personas it returns.
@@ -82,8 +82,15 @@ Pick the mode from the user's request.
    Manual and resume modes never need it.
 6. **Reuse first.** `persona list` (filters: `segment`, `tag`, `min_age`, `max_age`, `not_reacted_idea_id`) and `persona search` to find saved personas that fit each segment.
    Prefer personas that have not yet reacted to this idea. Create only the missing ones.
-7. **Generate the missing ones.** Use `persona_generator.md`, one segment at a time (do it yourself for up to 12 personas; for more, spawn one generator subagent per segment in a single message).
-   Before saving, run `persona search` for every generated persona. If `likely_duplicate` is true, drop it and use the existing id instead. Then save the rest with one `persona create --file`.
+7. **Research each persona profile, then generate the missing ones.** Never invent a persona from imagination alone.
+   a. For every segment that needs new personas (in manual mode: for every persona the user described), run 1 to 3 `WebSearch` queries about real people of that profile:
+      their daily routine and income reality, which platforms they use and how, the language and slang they use, how they feel about this product category and its ads, and their typical complaints.
+      Examples: "night shift nurses daily routine social media use", "freelance illustrators income irregular money habits", "Brazilian retirees smartphone use Facebook WhatsApp".
+      Use `mode: "standard"`; send independent searches in the same turn. Quick pass: 1 query per segment.
+   b. Distill the results into 3 to 6 short facts per segment and save them with `research add` (`topic`: `persona: <segment name>`, with `source_url` when known), so the origin of each persona stays auditable.
+   c. Pass those facts to the generator in `{{PERSONA_RESEARCH}}`. The generator must use them for each persona's routine, platforms, vocabulary and pain points.
+   d. Generate with `persona_generator.md`, one segment at a time (do it yourself for up to 12 personas; for more, spawn one generator subagent per segment in a single message).
+   e. Before saving, run `persona search` for every generated persona. If `likely_duplicate` is true, drop it and use the existing id instead. Then save the rest with one `persona create --file`.
 8. **Open the run.** `run start` with all persona ids (reused + new). Note `already_reacted_to_this_idea`: those personas saw this idea before; tell the user and still include them only if the user asked for a re-run,
    otherwise remove them and open the run without them.
 9. **Fan out.** For every persona: `persona get <id>`, then fill `persona_agent.md` (see FILLING THE TEMPLATE). Launch in batches of at most 10 agents per message. Start the next batch only after the previous batch returned.

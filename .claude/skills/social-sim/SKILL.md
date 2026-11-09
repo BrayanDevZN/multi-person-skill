@@ -32,6 +32,7 @@ database and are reused across simulations.
 
 - Open the run (`run start`) before launching persona agents; only the orchestrator writes to the database.
 - Simulate each persona in its own subagent, in parallel batches of at most 10, all agents of a batch in one message.
+- Before creating any new persona, research real people of that profile on the web (WebSearch), save the facts with `research add` and give them to the generator. Do not invent personas from imagination alone.
 - Do not analyze until every persona agent has returned or been recorded as failed. Never summarize partial results.
 - Persona count is 8 to 40 in autonomous mode. Propose it with a one-sentence reason, then ASK the user whether to keep, increase or decrease it, and wait for the answer before creating personas or opening the run. Skip the question only if the user fixed a number or said to run without asking.
 - Numbers in the final analysis come from `report run`. Report failures and weak results as plainly as good ones.

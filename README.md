@@ -81,7 +81,9 @@ Os comandos do banco rodam sempre a partir da raiz do projeto, onde fica o `bin/
  1. pesquisa o mercado na web ──► salva os achados (research)
  2. define de 3 a 8 segmentos (inclui ao menos um hostil ou mal encaixado)
  3. propõe quantas personas (de 8 a 40), justifica e PERGUNTA a você: manter, mais ou menos?
- 4. só depois da sua resposta: reaproveita personas do banco e cria só as que faltam
+ 4. só depois da sua resposta: reaproveita personas do banco
+ 4b. para cada persona nova, pesquisa na web gente real daquele perfil (rotina, plataformas, gírias,
+    atitude com anúncios) e só então cria a persona, ancorada nesses achados
  5. abre o run  ◄── antes de qualquer agente, para sobreviver a interrupções
  6. um subagente por persona, em paralelo (lotes de até 10), ciclo ReAct
  7. valida cada resultado e tenta corrigir uma vez; se falhar, registra como failed
@@ -214,6 +216,7 @@ Referência completa: [`cli_reference.md`](.claude/skills/social-sim/prompts/cli
 
 - **Só o orquestrador escreve no banco.** Os subagentes não têm ferramentas: devolvem JSON e pronto. Uma falha de
   agente não corrompe dados.
+- **Personas pesquisadas, não inventadas.** Antes de criar cada persona nova, a skill pesquisa na web como é a vida de gente real daquele perfil e salva os achados no banco (`research`), então dá para auditar a origem de cada persona.
 - **Confirmação antes de gastar.** Depois da pesquisa, a skill mostra o plano (segmentos, número de personas, custo em subagentes) e só segue quando você aprova, aumenta ou diminui. Dizer "faz direto" ou fixar um número pula a pergunta.
 - **O run abre antes dos agentes**, então o progresso sobrevive a interrupções e pode ser retomado.
 - **Contra o viés de "educação" do modelo:** ignorar é o resultado padrão, há contextos ruins de propósito, todo

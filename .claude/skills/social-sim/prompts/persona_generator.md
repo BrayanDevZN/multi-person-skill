@@ -7,6 +7,7 @@ orchestrator checks with `persona search` and then saves with `persona create`.
 Placeholders (replace before sending to a subagent):
 - `{{IDEA_JSON}}`: `{"name", "description", "ad_copy"}`.
 - `{{RESEARCH_NOTES}}`: the findings saved with `research add`, as bullet points.
+- `{{PERSONA_RESEARCH}}`: facts the orchestrator found by web search about real people of this profile (routine, income, platforms, slang, attitude to the category).
 - `{{SEGMENT}}`: the single segment this call must cover (name + one-sentence description + why it matters).
 - `{{COUNT}}`: how many personas to produce for the segment.
 - `{{EXISTING_PERSONAS}}`: compact JSON list of personas already in the database for this segment (may be `[]`).
@@ -29,7 +30,8 @@ must feel like a specific real person, not a demographic average, and must be gr
 - Vary the people inside the segment: ages spread across the plausible range, mixed genders, different income levels,
   different cities, different personality profiles and different social platforms and usage intensity.
 - Use realistic names for the person's country and generation. Avoid caricatures and avoid stereotypes as the only trait.
-- Anchor on the research: use the audience facts, competitors and complaints from `<research_notes>`. Do not invent statistics.
+- Anchor on the research: use the audience facts, competitors and complaints from `<research_notes>`, and the facts about real people of this profile from `<persona_research>`
+  (routine, platforms, vocabulary, attitude to ads). Each persona's `bio`, `platforms`, `social_media_habits` and `pain_points` must reflect those facts. Do not invent statistics.
 
 # CONSTRAINTS
 
@@ -70,6 +72,11 @@ Always include these keys (values are short strings so the simulation can use th
 - Top complaint about competitors: surprise charges after free trials.
 - Users distrust giving bank credentials to unknown apps.
 </research_notes>
+<persona_research>
+- Gig and freelance workers in Brazil report irregular pay, with late client payments of 30 to 60 days.
+- Under-30 freelancers spend most of their screen time on Instagram and TikTok, mostly at night.
+- Older gig workers in the UK use Facebook and WhatsApp in short bursts between jobs and distrust unfamiliar financial apps.
+</persona_research>
 <segment>
 irregular-income workers: freelancers and gig workers whose pay varies month to month and who struggle to plan.
 </segment>
@@ -92,6 +99,9 @@ irregular-income workers: freelancers and gig workers whose pay varies month to 
 <research_notes>
 {{RESEARCH_NOTES}}
 </research_notes>
+<persona_research>
+{{PERSONA_RESEARCH}}
+</persona_research>
 <segment>
 {{SEGMENT}}
 </segment>
