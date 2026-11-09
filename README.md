@@ -2,7 +2,7 @@
   <img src="assets/banner.svg" alt="social-sim: uma estrela central cercada por personas que reagem a um anúncio" width="100%">
 </p>
 
-# social-sim
+<h1 align="center">social-sim</h1>
 
 <p align="center">
   <a href="https://claude.com/claude-code"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-Skill-D97757?style=for-the-badge&logo=claude&logoColor=white"></a>
@@ -22,6 +22,10 @@
   <img alt="Status" src="https://img.shields.io/badge/status-em_desenvolvimento-F5A623?style=flat-square">
   <a href="https://github.com/BrayanDevZN/multi-person-skill/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/BrayanDevZN/multi-person-skill?style=flat-square&logo=github"></a>
   <a href="https://github.com/BrayanDevZN/multi-person-skill/commits/main"><img alt="Último commit" src="https://img.shields.io/github/last-commit/BrayanDevZN/multi-person-skill?style=flat-square&logo=git&logoColor=white"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/BrayanDevZN/multi-person-skill/raw/main/dist/social-sim.zip"><img alt="Baixar o ZIP" src="https://img.shields.io/badge/%E2%AC%87_BAIXAR-social--sim.zip-D97757?style=for-the-badge"></a>
 </p>
 
 Uma skill do Claude Code que simula um público de usuários de redes sociais vendo o anúncio da sua ideia
@@ -51,7 +55,7 @@ Requisitos: Python 3.11+, `python3-venv`, Claude Code e acesso à rede na primei
 
 **Opção 1: pelo ZIP pronto**
 
-1. Baixe [`dist/social-sim.zip`](dist/social-sim.zip) e extraia.
+1. Baixe o [`social-sim.zip`](https://github.com/BrayanDevZN/multi-person-skill/raw/main/dist/social-sim.zip) (fica em `dist/social-sim.zip` no repositório) e extraia.
 2. Abra a pasta extraída no Claude Code. A skill `.claude/skills/social-sim` é descoberta sozinha.
 3. Peça uma simulação (veja os [exemplos](#exemplos-de-pedidos)).
 
