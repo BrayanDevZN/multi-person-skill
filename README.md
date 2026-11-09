@@ -59,6 +59,12 @@ Requisitos: Python 3.11+, `python3-venv`, Claude Code e acesso à rede na primei
 2. Abra a pasta extraída no Claude Code. A skill `.claude/skills/social-sim` é descoberta sozinha.
 3. Peça uma simulação (veja os [exemplos](#exemplos-de-pedidos)).
 
+**Opção 1b: upload no Claude (claude.ai → Settings → Skills)**
+
+Use o [`social-sim-skill.zip`](https://github.com/BrayanDevZN/multi-person-skill/raw/main/social-sim-skill.zip), não o `social-sim.zip`.
+Nele o `SKILL.md` fica direto na pasta de topo (`social-sim/SKILL.md`), que é o que o upload exige.
+Para gerar de novo: `scripts/build_skill_zip.sh`.
+
 **Opção 2: pelo repositório**
 
 ```bash

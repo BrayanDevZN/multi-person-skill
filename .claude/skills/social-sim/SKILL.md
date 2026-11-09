@@ -14,8 +14,8 @@ database and are reused across simulations.
 1. **Read `prompts/orchestrator.md` in this folder first and follow it.** It is the full operating manual: workflow, rules,
    validation, final report format. Then read `prompts/cli_reference.md` (every database command). Read `prompts/persona_generator.md`
    and `prompts/persona_agent.md` when you reach the steps that use them.
-2. **Run every database command from the project root** (the directory that contains `bin/socialsim`; from this folder it is
-   `../../..`). The only way to touch the database is `bin/socialsim`. Never write SQL or edit the `.db` file directly.
+2. **Run every database command from the project root** (the directory that contains `bin/socialsim`; in the repository it is
+   `../../..` from this folder, in the uploaded skill package it is this folder itself). The only way to touch the database is `bin/socialsim`. Never write SQL or edit the `.db` file directly.
 3. The first `bin/socialsim` call creates a local virtualenv and installs dependencies, so it needs network access once.
    If it fails, show the user the error and the suggested command; do not work around it by skipping the database.
 
