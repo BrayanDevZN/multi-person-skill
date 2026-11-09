@@ -4,6 +4,26 @@
 
 # social-sim
 
+<p align="center">
+  <a href="https://claude.com/claude-code"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-Skill-D97757?style=for-the-badge&logo=claude&logoColor=white"></a>
+  <img alt="Python 3.11+" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white">
+  <img alt="SQLAlchemy 2.0" src="https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white">
+  <img alt="SQLite" src="https://img.shields.io/badge/SQLite-local-003B57?style=for-the-badge&logo=sqlite&logoColor=white">
+</p>
+
+<p align="center">
+  <img alt="Testes" src="https://img.shields.io/badge/testes-65_passando-2EA44F?style=flat-square&logo=pytest&logoColor=white">
+  <img alt="pytest" src="https://img.shields.io/badge/pytest-8%2B-0A9EDC?style=flat-square&logo=pytest&logoColor=white">
+  <img alt="Bash" src="https://img.shields.io/badge/wrapper-Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white">
+  <img alt="Setuptools" src="https://img.shields.io/badge/build-setuptools-6C757D?style=flat-square&logo=python&logoColor=white">
+  <img alt="Subagentes" src="https://img.shields.io/badge/subagentes-em_paralelo-D97757?style=flat-square&logo=anthropic&logoColor=white">
+  <img alt="Padrão ReAct" src="https://img.shields.io/badge/padr%C3%A3o-ReAct-8A2BE2?style=flat-square">
+  <img alt="Idioma" src="https://img.shields.io/badge/idioma-PT--BR-009C3B?style=flat-square">
+  <img alt="Status" src="https://img.shields.io/badge/status-em_desenvolvimento-F5A623?style=flat-square">
+  <a href="https://github.com/BrayanDevZN/multi-person-skill/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/BrayanDevZN/multi-person-skill?style=flat-square&logo=github"></a>
+  <a href="https://github.com/BrayanDevZN/multi-person-skill/commits/main"><img alt="Último commit" src="https://img.shields.io/github/last-commit/BrayanDevZN/multi-person-skill?style=flat-square&logo=git&logoColor=white"></a>
+</p>
+
 Uma skill do Claude Code que simula um público de usuários de redes sociais vendo o anúncio da sua ideia
 (por exemplo, "aplicativo de dieta"). Cada persona reage por conta própria, tudo fica guardado num banco SQLite local
 e você recebe uma análise com conversão, objeções, segmentos, falas representativas e recomendações.
